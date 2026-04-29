@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\CompanySetting;
 use App\Models\TaskStep;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,7 +23,23 @@ class StepAssignedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+        $companyId = $notifiable->company_id ?? $this->step->cycle?->task?->company_id;
+        $mailEnabled = true;
+        if ($companyId) {
+            $mailEnabled = (bool) CompanySetting::query()
+                ->where('company_id', $companyId)
+                ->value('mail_notifications_enabled');
+        }
+        $pref = $notifiable->notificationPreference;
+        $userMailEnabled = $pref?->mail_enabled ?? true;
+        $eventEnabled = $pref?->step_assigned_enabled ?? true;
+
+        if ($mailEnabled && $userMailEnabled && $eventEnabled) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage

@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CompanyController;
+use App\Http\Controllers\Api\V1\CompanySettingsController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\QuestionSetController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\TeamController;
+use App\Http\Controllers\Api\V1\UserNotificationController;
 use App\Http\Controllers\Api\V1\WorkflowController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +22,17 @@ Route::prefix('v1')->group(function (): void {
     });
 
     Route::middleware('auth:api')->group(function (): void {
+        Route::get('dashboard/summary', [DashboardController::class, 'summary']);
+        Route::get('dashboard/charts/releases-by-status', [DashboardController::class, 'releasesByStatus']);
+        Route::get('dashboard/charts/monthly-releases', [DashboardController::class, 'monthlyReleases']);
+        Route::get('dashboard/charts/team-step-load', [DashboardController::class, 'teamStepLoad']);
+        Route::get('dashboard/charts/role-release-view', [DashboardController::class, 'roleReleaseView']);
+        Route::get('dashboard/project-options', [DashboardController::class, 'projectOptions']);
+
+        Route::get('company-settings', [CompanySettingsController::class, 'show']);
+        Route::patch('company-settings', [CompanySettingsController::class, 'update']);
+        Route::post('company-settings/toggle-mail', [CompanySettingsController::class, 'toggleMail']);
+
         Route::apiResource('companies', CompanyController::class)->only(['index', 'store']);
         Route::patch('companies/{company}/approve', [CompanyController::class, 'approve']);
         Route::patch('companies/{company}/suspend', [CompanyController::class, 'suspend']);
@@ -54,5 +68,12 @@ Route::prefix('v1')->group(function (): void {
         Route::post('tasks/{task}/release-notes', [TaskController::class, 'storeReleaseNote']);
         Route::get('tasks/{task}/history', [TaskController::class, 'history']);
         Route::get('tasks/{task}/audit-logs', [TaskController::class, 'auditLogs']);
+
+        Route::get('me/notifications', [UserNotificationController::class, 'index']);
+        Route::get('me/notifications/unread-count', [UserNotificationController::class, 'unreadCount']);
+        Route::post('me/notifications/{notification}/read', [UserNotificationController::class, 'markRead']);
+        Route::post('me/notifications/read-all', [UserNotificationController::class, 'markAllRead']);
+        Route::get('me/notification-preferences', [UserNotificationController::class, 'preferences']);
+        Route::patch('me/notification-preferences', [UserNotificationController::class, 'updatePreferences']);
     });
 });

@@ -21,7 +21,16 @@ class TaskRestartedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+        $companyMailEnabled = $notifiable->company?->settings?->mail_notifications_enabled ?? true;
+        $userMailEnabled = $notifiable->notificationPreference?->mail_enabled ?? true;
+        $eventEnabled = $notifiable->notificationPreference?->task_restarted_enabled ?? true;
+
+        if ($companyMailEnabled && $userMailEnabled && $eventEnabled) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage

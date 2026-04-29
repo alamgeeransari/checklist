@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\CompanySetting;
 use App\Models\Task;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +20,25 @@ class TaskCreatedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+
+        $companyId = $notifiable->company_id ?? $this->task->company_id;
+        $mailEnabled = true;
+        if ($companyId) {
+            $mailEnabled = (bool) CompanySetting::query()
+                ->where('company_id', $companyId)
+                ->value('mail_notifications_enabled');
+        }
+
+        $pref = $notifiable->notificationPreference;
+        $userWantsMail = $pref?->mail_enabled ?? true;
+        $userEventEnabled = $pref?->task_created_enabled ?? true;
+
+        if ($mailEnabled && $userWantsMail && $userEventEnabled) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage

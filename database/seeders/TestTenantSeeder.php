@@ -4,10 +4,12 @@ namespace Database\Seeders;
 
 use App\Enums\CompanyStatus;
 use App\Models\Company;
+use App\Models\CompanySetting;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\UserNotificationPreference;
 use App\Models\UserRole;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -78,6 +80,18 @@ class TestTenantSeeder extends Seeder
                     'updated_at' => now(),
                 ],
             ]);
+
+            UserNotificationPreference::query()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'mail_enabled' => true,
+                    'push_enabled' => true,
+                    'task_created_enabled' => true,
+                    'step_assigned_enabled' => true,
+                    'step_completed_enabled' => true,
+                    'task_restarted_enabled' => true,
+                ]
+            );
         }
 
         $this->assignRole($superAdmin, 'Super Admin', null, null);
@@ -98,6 +112,15 @@ class TestTenantSeeder extends Seeder
         $this->createTeam($project, 'Tech Manager', [$technicalManager], [$technicalManager->id]);
         $this->createTeam($project, 'PM', [$pmUser], [$pmUser->id]);
         $this->createTeam($project, 'Infra', [$infraUser], [$infraUser->id]);
+
+        CompanySetting::query()->updateOrCreate(
+            ['company_id' => $company->id],
+            [
+                'ui_theme' => 'light',
+                'primary_color' => '#2563EB',
+                'mail_notifications_enabled' => true,
+            ]
+        );
 
     }
 
