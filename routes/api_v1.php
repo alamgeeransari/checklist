@@ -72,7 +72,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('me/notifications', [UserNotificationController::class, 'index']);
         Route::get('me/notifications/unread-count', [UserNotificationController::class, 'unreadCount']);
         Route::post('me/notifications/{notification}/read', [UserNotificationController::class, 'markRead']);
-        Route::post('me/notifications/read-all', [UserNotificationController::class, 'markAllRead']);
+        Route::post('me/notifications/read-all', [UserNotificationController::class, 'markAllAsRead']);
         Route::get('me/notification-preferences', [UserNotificationController::class, 'preferences']);
         Route::patch('me/notification-preferences', [UserNotificationController::class, 'updatePreferences']);
     });

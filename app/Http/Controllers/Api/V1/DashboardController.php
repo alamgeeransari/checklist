@@ -51,6 +51,13 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function projectOptions(Request $request): JsonResponse
+    {
+        return response()->json(
+            $this->dashboardService->projectOptionsFor($request->user())
+        );
+    }
+
     private function dashboard(Request $request): array
     {
         return $this->dashboardService->buildReleaseDashboard($request->user(), [
